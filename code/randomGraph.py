@@ -5,8 +5,8 @@ import random
 from FloydWarshall import Floyd
 
 # 设置输出目录与检查
-dot_output_directory = 'graphs'  
-png_output_directory = 'photos'
+dot_output_directory = 'graphs/'  
+png_output_directory = 'photos/'
 os.makedirs(dot_output_directory, exist_ok=True)
 os.makedirs(png_output_directory, exist_ok=True)
 base_file_name = 'randomGraph1'
@@ -33,5 +33,6 @@ for line in dist:
     
 
 # 渲染图
-dot.render(f'{dot_output_directory}{base_file_name}', format='dot')  # 生成 dot 文件
+# dot.render(f'{dot_output_directory}{base_file_name}', format='dot')  # 生成 dot 文件
 dot.render(f'{png_output_directory}{base_file_name}', format='png', view=True)  # 生成 PNG 文件
+os.rename(f'{png_output_directory}{base_file_name}', f'{dot_output_directory}{base_file_name}')  # 删除 dot 文件
