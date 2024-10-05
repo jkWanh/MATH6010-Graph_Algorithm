@@ -2,7 +2,7 @@ import networkx as nx
 import graphviz
 import os
 import random
-from FloydWarshall import Floyd
+from codes.algorithm import Floyd
 from ioProcess import generateRandomGraph, renderGraph
 
 

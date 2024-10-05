@@ -3,6 +3,8 @@ import graphviz
 import os
 import random
 
+from typing import Union
+
 # 设置输出目录与检查
 dot_output_directory = 'graphs/'  
 png_output_directory = 'photos/'
@@ -22,9 +24,12 @@ def generateRandomGraph(node: int, temperature: float) -> nx.Graph:
     return G
 
 
-def renderGraph(G: nx.Graph):
+def renderGraph(G: Union[nx.Graph, nx.DiGraph]):
     # 创建一个 Graphviz 的 graph 对象
-    dot = graphviz.Graph()
+    if isinstance(G, nx.DiGraph):
+        dot = graphviz.Digraph()
+    else:
+        dot = graphviz.Graph()
 
     # 添加节点和边
     for node in G.nodes():

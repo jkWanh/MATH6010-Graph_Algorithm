@@ -1,15 +1,19 @@
 import numpy as np
-from networkx import Graph
+import networkx as nx
+from typing import Union
 
-def Floyd(Graph : Graph):
+def Floyd(Graph : Union[nx.Graph, nx.DiGraph]) -> np.ndarray:
     # 初始化
     n = len(Graph)
     dist = np.array([[float('inf') for i in range(n)] for j in range(n)])
     for i in range(n):
         dist[i][i] = 0
     for edge in Graph.edges():
-        dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
-        dist[edge[1]][edge[0]] = Graph[edge[0]][edge[1]]['weight']
+        if isinstance(Graph, nx.DiGraph):
+            dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
+        else:
+            dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
+            dist[edge[1]][edge[0]] = Graph[edge[0]][edge[1]]['weight']
     # Floyd算法
     for k in range(n):
         for i in range(n):
@@ -20,7 +24,7 @@ def Floyd(Graph : Graph):
 
 
 
-def Floyd2(Graph : Graph) -> np.ndarray:
+def Floyd2(Graph : nx.Graph) -> np.ndarray:
     """返回最短路矩阵, 使用Floyd算法, 专用于无向图
 
     Args:
@@ -46,7 +50,7 @@ def Floyd2(Graph : Graph) -> np.ndarray:
                     dist[j][i] = dist[i][k] + dist[k][j]
     return dist
 
-def Dijsktra(Graph : Graph, start : int):
+def Dijsktra(Graph : nx.Graph, start : int):
     # 初始化
     n = len(Graph)
     dist = np.array([float('inf') for i in range(n)])
@@ -64,7 +68,7 @@ def Dijsktra(Graph : Graph, start : int):
                 dist[v] = dist[u] + Graph[u][v]['weight']
     return dist
 
-def BellmanFord(Graph : Graph, start : int):
+def BellmanFord(Graph : nx.Graph, start : int):
     # 初始化
     n = len(Graph)
     dist = np.array([float('inf') for i in range(n)])
@@ -76,7 +80,7 @@ def BellmanFord(Graph : Graph, start : int):
                 dist[edge[1]] = dist[edge[0]] + Graph[edge[0]][edge[1]]['weight']
     return dist
 
-def BellmanFoldSPFA(Graph : Graph, start : int):
+def BellmanFoldSPFA(Graph : nx.Graph, start : int):
     # 初始化
     n = len(Graph)
     dist = np.array([float('inf') for i in range(n)])
