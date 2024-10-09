@@ -16,7 +16,7 @@ from codes.ioProcess import renderGraph
 
 class TestClass:
     def __init__(self, test_cases_file: str = None) -> None:
-        self.geaph_list = []
+        self.graph_list = []
         self.shortest_path_matrix = []
         
 def check_edge_weight(G: nx.Graph) -> bool:

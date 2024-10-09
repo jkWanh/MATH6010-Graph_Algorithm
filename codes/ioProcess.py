@@ -6,8 +6,8 @@ import random
 from typing import Union
 
 # 设置输出目录与检查
-dot_output_directory = 'graphs/'  
-png_output_directory = 'photos/'
+dot_output_directory = 'data/graphs/'  
+png_output_directory = 'data/photos/'
 try:
     os.makedirs(dot_output_directory, exist_ok=True)
     os.makedirs(png_output_directory, exist_ok=True)
@@ -15,14 +15,6 @@ except:
     print('Directory already exists')
     exit(1)
 base_file_name = 'randomGraph1'
-
-def generateRandomGraph(node: int, temperature: float) -> nx.Graph:
-    # 生成一个随机图
-    G = nx.erdos_renyi_graph(node, temperature)
-    for (u,v) in G.edges():
-        G[u][v]['weight'] = random.randint(1, 10)
-    return G
-
 
 def renderGraph(G: Union[nx.Graph, nx.DiGraph]):
     # 创建一个 Graphviz 的 graph 对象

@@ -3,6 +3,14 @@ import networkx as nx
 from typing import Union
 
 def Floyd(Graph : Union[nx.Graph, nx.DiGraph]) -> np.ndarray:
+    """返回最短路矩阵, 使用Floyd算法
+
+    Args:
+        Graph (Union[nx.Graph, nx.DiGraph]): networkx.Graph / networkx.DiGraph 表示的图
+
+    Returns:
+        np.ndarray: 最短路矩阵
+    """
     # 初始化
     n = len(Graph)
     dist = np.array([[float('inf') for i in range(n)] for j in range(n)])
