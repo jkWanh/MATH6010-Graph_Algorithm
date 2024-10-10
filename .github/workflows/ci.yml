@@ -24,6 +24,11 @@ jobs:
           environment-file: environment.yml  # 指定你的 conda 环境文件
           activate-environment: testenv  # 指定你的 conda 环境名称
 
+      - name: Initialize Conda
+        run: |
+          conda init bash
+          source ~/.bashrc
+  
       - name: Install dependencies
         run: |
           conda env update --file environment.yml --name testenv
