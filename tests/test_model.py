@@ -3,6 +3,7 @@ import os
 import json
 import sys
 import importlib
+import inspect
 
 import pytest
 import networkx as nx
@@ -15,9 +16,50 @@ from codes.algorithm import Floyd
 from codes.ioProcess import renderGraph
 
 class TestClass:
-    def __init__(self, test_cases_file: str = None) -> None:
-        self.graph_list = []
-        self.shortest_path_matrix = []
+    def setup_method(self, test_cases_file: str = None) -> None:
+        self.test_cases = []
+        if test_cases_file is not None:
+            self.test_cases = load_graph_list_from_json(test_cases_file)
+
+    def random_test(self, test_algorithm: callable = None, num: int = 10) -> None:
+        """接受待测试算法函数，随机选择最短路起点和终点进行测试
+
+        Args:
+            test_algorithm (function, optional): 待测试算法函数. Defaults to None. 函数需要按序接受三个参数，即networkx.Graph或networkx.DiGraph对象作为输入图，int类型的起点和终点，返回float类型的最短路径长度
+            num (int, optional): 每一个测试case选取的点对数量. Defaults to 10.
+        """
+
+        # 检查输入
+        if len(self.test_cases) == 0:
+            raise ValueError("No test cases loaded")
+        if test_algorithm is None:
+            raise ValueError("missing test_algorithm parameter")
+        test_algorithm_signature = inspect.signature(test_algorithm)
+        test_algorithm_parameters = test_algorithm_signature.parameters
+        if len(test_algorithm_parameters) != 3:
+            raise ValueError("test_algorithm should accept 3 parameters")
+        if test_algorithm_signature.return_annotation != float:
+            raise ValueError("test_algorithm should return float type")
+        param_types = [set([nx.Graph, nx.DiGraph]), set([int]), set([int])]
+        for parms, expected_type in zip(test_algorithm_parameters.values(), param_types):
+            if parms.annotation not in expected_type:
+                raise ValueError("test_algorithm parameter type error")
+        
+        # 随机测试
+        for test_data in self.test_cases:
+            G = test_data['graph']
+            shortest_path_matrix = test_data['shortest_path_matrix']
+            n = len(G.nodes)
+            for _ in range(num):
+                s = random.randint(0, n - 1)
+                t = random.randint(0, n - 1)
+                if np.isinf(shortest_path_matrix[s][t]):
+                    assert np.isinf(test_algorithm(G, s, t))
+                elif np.isnan(shortest_path_matrix[s][t]):
+                    assert np.isnan(test_algorithm(G, s, t))
+                else:
+                    assert test_algorithm(G, s, t) == shortest_path_matrix[s][t]
+        
         
 def check_edge_weight(G: nx.Graph) -> bool:
     """检查图G的边是否有weight属性
@@ -110,8 +152,11 @@ def load_graph_list_from_json(file_path: str) -> list:
     Returns:
         list: 读取的图列表
     """
-    with open(file_path, 'r') as f:
-        data_list_json = json.load(f)
+    try:
+        with open(file_path, 'r') as f:
+            data_list_json = json.load(f)
+    except (OSError, IOError) as e:
+        raise e
     data_list = []
     for data_json in data_list_json:
         graph = json_graph.node_link_graph(data_json['graph'])
@@ -125,28 +170,3 @@ def load_graph_list_from_json(file_path: str) -> list:
         }
         data_list.append(data)
     return data_list
-
-
-
-if __name__ == "__main__":
-    # generate_test_cases()
-    # graph_list = load_graph_list_from_json('tests/sample_test_cases/sample_test_cases.json')
-    # i = 0
-    # for G in graph_list:
-    #     i += 1
-    #     ioProcess.base_file_name = f'randomGraph{i}'
-    #     ioProcess.renderGraph(G)
-    # generate_test_cases()
-    tc.generate_test_cases('class8', random.randint(11, 50))
-    # graph_list = load_graph_list_from_json('data/sample_test_cases/sample_test_cases.json')
-    # i = 0
-    # for data in graph_list:
-    #     i += 1
-    #     G = data['graph']
-    #     shortest_path_matrix = data['shortest_path_matrix']
-    #     ioProcess.base_file_name = f'randomGraph{i}'
-    #     renderGraph(G)
-    #     print(shortest_path_matrix)
-    #     print("************************************")
-        
-

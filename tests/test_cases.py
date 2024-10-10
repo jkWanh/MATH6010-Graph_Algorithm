@@ -2,7 +2,7 @@ import random
 import os
 
 import networkx as nx
-import tests.test as test
+import tests.test_model as test_model
 
 from typing import Union
 
@@ -35,7 +35,7 @@ def generate_class2_random_graph(n: int, temperature: float) -> nx.DiGraph:
     G = nx.erdos_renyi_graph(n, temperature, directed=True)
     for (u, v) in G.edges():
         G[u][v]['weight'] = random.randint(-50, 50)
-    while test.check_negative_cycle(G):
+    while test_model.check_negative_cycle(G):
         (u, v, weight) = random.choice([(u, v, data['weight']) for u, v, data in G.edges(data=True) if data['weight'] < 0])
         G[u][v]['weight'] = random.randint(0, 50)
     return G
@@ -85,7 +85,7 @@ def generate_class5_random_graph(n: int) -> nx.DiGraph:
     G = nx.gnm_random_graph(n, m, directed=True)
     for (u, v) in G.edges():
         G[u][v]['weight'] = random.randint(-50, 50)
-    while test.check_negative_cycle(G):
+    while test_model.check_negative_cycle(G):
         (u, v, weight) = random.choice([(u, v, data['weight']) for u, v, data in G.edges(data=True) if data['weight'] < 0])
         G[u][v]['weight'] = random.randint(0, 50)
     return G
@@ -103,7 +103,7 @@ def generate_class6_random_graph(n: int) -> nx.DiGraph:
     G = nx.gnm_random_graph(n, m, directed=True)
     for (u, v) in G.edges():
         G[u][v]['weight'] = random.randint(-50, 50)
-    while test.check_negative_cycle(G):
+    while test_model.check_negative_cycle(G):
         (u, v, weight) = random.choice([(u, v, data['weight']) for u, v, data in G.edges(data=True) if data['weight'] < 0])
         G[u][v]['weight'] = random.randint(0, 50)
     return G
@@ -122,7 +122,7 @@ def generate_class7_random_graph(n: int, temperature: float, directed: bool = Fa
     G = nx.erdos_renyi_graph(n, temperature, directed=directed)
     for (u, v) in G.edges():
         G[u][v]['weight'] = random.randint(-50, 50)
-    while not test.check_negative_cycle(G):
+    while not test_model.check_negative_cycle(G):
         (u, v, weight) = random.choice([(u, v, data['weight']) for u, v, data in G.edges(data=True) if data['weight'] >= 0])
         G[u][v]['weight'] = random.randint(-50, -1)
     return G
@@ -228,4 +228,4 @@ def generate_test_cases(case_type: str = 'class1', num: int = 10):
     for fileName in os.listdir(f'data/sample_test_cases/{case_type}'):
         if fileName.startswith(f'{scale}_{case_type}_test_cases'):
             count += 1
-    test.save_graph_list_to_json(test_cases, f'data/sample_test_cases/{case_type}/{scale}_{case_type}_test_cases{count+1}.json')
+    test_model.save_graph_list_to_json(test_cases, f'data/sample_test_cases/{case_type}/{scale}_{case_type}_test_cases{count+1}.json')
