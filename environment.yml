@@ -1,0 +1,11 @@
+name: testenv
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - networkx
+  - pip
+  - pip:
+      - pytest
+      - pytest-benchmark

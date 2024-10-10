@@ -7,7 +7,7 @@ import tests.test_model as test_model
 from typing import Union
 
 def generate_class1_random_graph(n: int, temperature: float, directed: bool = False) -> Union[nx.Graph, nx.DiGraph]:
-    """生成等价类1：非负边权重图（含有向图&无向图，边权重$[0,100]$）
+    """生成等价类1: 非负边权重图(含有向图&无向图，边权重[0,100])
 
     Args:
         n (int): 点数
@@ -23,7 +23,7 @@ def generate_class1_random_graph(n: int, temperature: float, directed: bool = Fa
     return G
 
 def generate_class2_random_graph(n: int, temperature: float) -> nx.DiGraph:
-    """生成等价类2：含负边权重图（含负权重边的有向图，边权重$[-50,50]$，无负权重环）
+    """生成等价类2: 含负边权重图(含负权重边的有向图，边权重[-50,50]，无负权重环)
 
     Args:
         n (int): 点数
@@ -41,7 +41,7 @@ def generate_class2_random_graph(n: int, temperature: float) -> nx.DiGraph:
     return G
 
 def generate_class3_random_graph(n: int, directed: bool = False) -> Union[nx.Graph, nx.DiGraph]:
-    """生成等价类3：非负边权重稀疏图（含有向图&无向图，边权重$[0,100]$，$|E| < 5\cdot|V|$）
+    """生成等价类3: 非负边权重稀疏图(含有向图&无向图，边权重[0,100], |E| < 5·|V|)
 
     Args:
         n (int): 点数
@@ -57,7 +57,7 @@ def generate_class3_random_graph(n: int, directed: bool = False) -> Union[nx.Gra
     return G
 
 def generate_class4_random_graph(n: int, directed: bool = False) -> Union[nx.Graph, nx.DiGraph]:
-    """生成等价类4: 非负边权重稠密图（含有向图&无向图，边权重$[0,100]$，$|E| > 0.5\cdot|V|^2$）
+    """生成等价类4: 非负边权重稠密图(含有向图&无向图，边权重[0,100], |E| > 0.5·|V|^2)
 
     Args:
         n (int): 点数
@@ -73,7 +73,7 @@ def generate_class4_random_graph(n: int, directed: bool = False) -> Union[nx.Gra
     return G
 
 def generate_class5_random_graph(n: int) -> nx.DiGraph:
-    """生成等价类5: 含负边权重稀疏图（含负权重边有向图，边权重$[-50,50]$，$|E| < 5\cdot|V|$，无负权重环）
+    """生成等价类5: 含负边权重稀疏图(含负权重边有向图，边权重[-50,50], |E| < 5·|V|, 无负权重环)
 
     Args:
         n (int): 点数
@@ -91,7 +91,7 @@ def generate_class5_random_graph(n: int) -> nx.DiGraph:
     return G
 
 def generate_class6_random_graph(n: int) -> nx.DiGraph:
-    """生成等价类6: 含负边权重稠密图（含负权重边有向图，边权重$[-50,50]$，$|E| > 0.5\cdot|V|^2$，无负权重环）
+    """生成等价类6: 含负边权重稠密图(含负权重边有向图，边权重[-50,50], |E| > 0.5·|V|^2, 无负权重环)
 
     Args:
         n (int): 点数
@@ -109,7 +109,7 @@ def generate_class6_random_graph(n: int) -> nx.DiGraph:
     return G
 
 def generate_class7_random_graph(n: int, temperature: float, directed: bool = False ) -> Union[nx.Graph, nx.DiGraph]:
-    """生成等价类7: 负权重环图（含有向图&无向图，边权重$[-50,50]$且至少有向图有一个负权重环, 无向图至少含有一条负权重边）
+    """生成等价类7: 负权重环图(含有向图&无向图，边权重[-50,50]且至少有向图有一个负权重环, 无向图至少含有一条负权重边)
 
     Args:
         n (int): 点数
