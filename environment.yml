@@ -8,4 +8,4 @@ dependencies:
   - pip
   - pip:
       - pytest
-      - pytest-benchmark
+      - graphviz
