@@ -3,10 +3,10 @@ name: Graph Algorithm Project CI
 on:
   push:
     branches:
-      - v1.0-building
+      - main
   pull_request:
     branches:
-      - v1.0-building
+      - main
 
 jobs:
   test:
@@ -24,18 +24,16 @@ jobs:
           environment-file: environment.yml  # 指定你的 conda 环境文件
           activate-environment: testenv  # 指定你的 conda 环境名称
 
-      - name: Initialize Conda
-        run: |
+      - name: Initialize Conda and Install dependencies
+        run: bash -c "
           conda init bash
           source ~/.bashrc
-  
-      - name: Install dependencies
-        run: |
           conda env update --file environment.yml --name testenv
           conda activate testenv
-          pip install pytest 
-
+          pip install pytest"
+        
       - name: Run tests
-        run: |
+        run: bash -c "
+          source ~/.bashrc
           conda activate testenv
-          pytest
+          pytest"
