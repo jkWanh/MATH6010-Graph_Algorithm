@@ -21,19 +21,7 @@ class TestClass:
         if test_cases_file is not None:
             self.test_cases = load_graph_list_from_json(test_cases_file)
 
-    def random_test(self, test_algorithm: callable = None, num: int = 10) -> None:
-        """接受待测试算法函数，随机选择最短路起点和终点进行测试
-
-        Args:
-            test_algorithm (function, optional): 待测试算法函数. Defaults to None. 函数需要按序接受三个参数，即networkx.Graph或networkx.DiGraph对象作为输入图，int类型的起点和终点，返回float类型的最短路径长度
-            num (int, optional): 每一个测试case选取的点对数量. Defaults to 10.
-        """
-
-        # 检查输入
-        if len(self.test_cases) == 0:
-            raise ValueError("No test cases loaded")
-        if test_algorithm is None:
-            raise ValueError("missing test_algorithm parameter")
+    def setup_test_algorithm(self, test_algorithm: callable) -> None:
         test_algorithm_signature = inspect.signature(test_algorithm)
         test_algorithm_parameters = test_algorithm_signature.parameters
         if len(test_algorithm_parameters) != 3:
@@ -44,6 +32,17 @@ class TestClass:
         for parms, expected_type in zip(test_algorithm_parameters.values(), param_types):
             if parms.annotation not in expected_type:
                 raise ValueError("test_algorithm parameter type error")
+            
+        self.random_sp_test_algorithm = test_algorithm
+
+    def random_test(self, num: int = 10) -> None:
+
+        # 检查输入
+        if len(self.test_cases) == 0:
+            raise ValueError("No test cases loaded")
+        if self.random_sp_test_algorithm is None:
+            raise ValueError("No test algorithm loaded")
+        
         
         # 随机测试
         for test_data in self.test_cases:
@@ -54,11 +53,11 @@ class TestClass:
                 s = random.randint(0, n - 1)
                 t = random.randint(0, n - 1)
                 if np.isinf(shortest_path_matrix[s][t]):
-                    assert np.isinf(test_algorithm(G, s, t))
+                    assert np.isinf(self.random_sp_test_algorithm(G, s, t))
                 elif np.isnan(shortest_path_matrix[s][t]):
-                    assert np.isnan(test_algorithm(G, s, t))
+                    assert np.isnan(self.random_sp_test_algorithm(G, s, t))
                 else:
-                    assert test_algorithm(G, s, t) == shortest_path_matrix[s][t]
+                    assert self.random_sp_test_algorithm(G, s, t) == shortest_path_matrix[s][t]
         
         
 def check_edge_weight(G: nx.Graph) -> bool:

@@ -58,34 +58,47 @@ def Floyd2(Graph : nx.Graph) -> np.ndarray:
                     dist[j][i] = dist[i][k] + dist[k][j]
     return dist
 
-def Dijsktra(Graph : nx.Graph, start : int):
-    # 初始化
+def Dijkstra(Graph: Union[nx.Graph, nx.DiGraph], start: int):
     n = len(Graph)
-    dist = np.array([float('inf') for i in range(n)])
+    dist = np.array([float('inf') for _ in range(n)])
     dist[start] = 0
-    visited = [False for i in range(n)]
-    # Dijkstra算法
-    for i in range(n):
+    visited = [False for _ in range(n)]
+    
+    for _ in range(n):
+        min_dist = float('inf')
         u = -1
         for j in range(n):
-            if not visited[j] and (u == -1 or dist[j] < dist[u]):
+            if not visited[j] and dist[j] < min_dist:
                 u = j
+                min_dist = dist[j]
+        if u == -1:  # 所有可达节点已访问
+            break
         visited[u] = True
         for v in range(n):
-            if not visited[v] and dist[u] + Graph[u][v]['weight'] < dist[v]:
-                dist[v] = dist[u] + Graph[u][v]['weight']
+            if not visited[v]:
+                edge_data = Graph.get_edge_data(u, v)
+                if edge_data is not None:
+                    weight = edge_data.get('weight', float('inf'))
+                    if dist[u] + weight < dist[v]:
+                        dist[v] = dist[u] + weight
     return dist
 
-def BellmanFord(Graph : nx.Graph, start : int):
-    # 初始化
+def BellmanFord(Graph: Union[nx.Graph, nx.DiGraph], start: int):
     n = len(Graph)
-    dist = np.array([float('inf') for i in range(n)])
+    dist = np.array([float('inf') for _ in range(n)])
     dist[start] = 0
-    # Bellman-Ford算法
-    for i in range(n):
-        for edge in Graph.edges():
-            if dist[edge[0]] + Graph[edge[0]][edge[1]]['weight'] < dist[edge[1]]:
-                dist[edge[1]] = dist[edge[0]] + Graph[edge[0]][edge[1]]['weight']
+    if isinstance(Graph, nx.DiGraph):
+        for _ in range(n):
+            for u, v in Graph.edges():
+                if dist[u] + Graph[u][v]['weight'] < dist[v]:
+                    dist[v] = dist[u] + Graph[u][v]['weight']
+    elif isinstance(Graph, nx.Graph):
+        for _ in range(n):
+            for u, v in Graph.edges():
+                if dist[u] + Graph[u][v]['weight'] < dist[v]:
+                    dist[v] = dist[u] + Graph[u][v]['weight']
+                if dist[v] + Graph[u][v]['weight'] < dist[u]:
+                    dist[u] = dist[v] + Graph[u][v]['weight']
     return dist
 
 def BellmanFoldSPFA(Graph : nx.Graph, start : int):
@@ -107,3 +120,14 @@ def BellmanFoldSPFA(Graph : nx.Graph, start : int):
                     queue.append(v)
                     inQueue[v] = True
     return dist
+
+# if __name__ == '__main__':
+#     G = nx.Graph()
+#     G.add_edge(0, 1, weight=1)
+#     G.add_edge(1, 2, weight=2)
+#     G.add_edge(2, 3, weight=3)
+#     G.add_edge(3, 0, weight=4)
+#     G.add_edge(0, 2, weight=5)
+#     G.add_edge(1, 3, weight=6)
+#     G.add_edge(4, 5, weight=7)
+#     print(BellmanFord(G, 3))
