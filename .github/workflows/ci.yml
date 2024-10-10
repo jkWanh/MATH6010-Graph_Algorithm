@@ -29,11 +29,9 @@ jobs:
           conda init bash
           source ~/.bashrc
           conda env update --file environment.yml --name testenv
+          conda activate testenv
+          pip install pytest
 
       - name: Run tests
         run: |
-          conda init bash
-          source ~/.bashrc
-          conda activate testenv
-          pip install pytest
           pytest
