@@ -30,13 +30,11 @@ def Floyd(Graph : Union[nx.Graph, nx.DiGraph]) -> np.ndarray:
                     dist[i][j] = dist[i][k] + dist[k][j]
     return dist
 
-
-
-def Floyd2(Graph : nx.Graph) -> np.ndarray:
-    """返回最短路矩阵, 使用Floyd算法, 专用于无向图
+def FloydGetPath(Graph : Union[nx.Graph, nx.DiGraph], start : int, end : int) -> (list, float):
+    """返回最短路列表&路径长度, 使用Floyd算法
 
     Args:
-        Graph (Graph): networkx.Graph表示的图
+        Graph (Union[nx.Graph, nx.DiGraph]): networkx.Graph / networkx.DiGraph 表示的图
 
     Returns:
         np.ndarray: 最短路矩阵
@@ -44,19 +42,39 @@ def Floyd2(Graph : nx.Graph) -> np.ndarray:
     # 初始化
     n = len(Graph)
     dist = np.array([[float('inf') for i in range(n)] for j in range(n)])
+    next_node = np.full((n, n), np.nan, dtype=object)
     for i in range(n):
         dist[i][i] = 0
     for edge in Graph.edges():
-        dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
-        dist[edge[1]][edge[0]] = Graph[edge[0]][edge[1]]['weight']
-    # Floyd算法，结果为对称矩阵因此每次只计算上三角矩阵
+        if isinstance(Graph, nx.DiGraph):
+            dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
+            next_node[edge[0]][edge[1]] = (edge[1], dist[edge[0]][edge[1]])
+        else:
+            dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
+            dist[edge[1]][edge[0]] = Graph[edge[0]][edge[1]]['weight']
+            next_node[edge[0]][edge[1]] = (edge[1], dist[edge[0]][edge[1]])
+            next_node[edge[1]][edge[0]] = (edge[0], dist[edge[1]][edge[0]])
+    # Floyd算法
     for k in range(n):
         for i in range(n):
-            for j in range(i, n):
+            for j in range(n):
                 if dist[i][j] > dist[i][k] + dist[k][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
-                    dist[j][i] = dist[i][k] + dist[k][j]
-    return dist
+                    next_node[i][j] = next_node[i][k]
+
+    shortest_dict = dist[start][end]
+
+    # 建立路径
+    if not isinstance(next_node[start][end], tuple):
+        return [], float('inf')
+    path = []
+    while start != end:
+        path.append((start, next_node[start][end][0], int(next_node[start][end][1])))
+        start = next_node[start][end][0]
+        
+    return path, shortest_dict
+
+
 
 def Dijkstra(Graph: Union[nx.Graph, nx.DiGraph], start: int):
     n = len(Graph)

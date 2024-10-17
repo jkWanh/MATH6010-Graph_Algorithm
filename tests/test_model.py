@@ -14,6 +14,7 @@ import codes.ioProcess as ioProcess
 from networkx.readwrite import json_graph
 from codes.algorithm import Floyd
 from codes.ioProcess import renderGraph
+from typing import Union
 
 class TestClass:
     def setup_method(self, test_cases_file: str = None) -> None:
@@ -58,9 +59,18 @@ class TestClass:
                     assert np.isnan(self.random_sp_test_algorithm(G, s, t))
                 else:
                     assert self.random_sp_test_algorithm(G, s, t) == shortest_path_matrix[s][t]
+    
+    def get_random_graph(self, n: int = 1) -> list[Union[nx.Graph, nx.DiGraph]]:
+        if self.test_cases is None:
+            raise ValueError("No test cases loaded")
+        if n > len(self.test_cases):
+            raise ValueError("Not enough test cases")
+        index = random.sample(range(len(self.test_cases)), n)
+        return [self.test_cases[i]['graph'] for i in index]
+
         
         
-def check_edge_weight(G: nx.Graph) -> bool:
+def check_edge_weight(G: Union[nx.Graph, nx.DiGraph]) -> bool:
     """检查图G的边是否有weight属性
 
     Args:
@@ -74,7 +84,7 @@ def check_edge_weight(G: nx.Graph) -> bool:
             return False
     return True
 
-def check_negative_cycle(G: nx.Graph) -> bool:
+def check_negative_cycle(G: Union[nx.Graph, nx.DiGraph]) -> bool:
     """检查图G是否含有负权重环
 
     Args:
