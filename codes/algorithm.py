@@ -1,5 +1,7 @@
 import numpy as np
 import networkx as nx
+import multiprocessing
+from collections import deque
 from typing import Union
 
 def Floyd(Graph : Union[nx.Graph, nx.DiGraph]) -> np.ndarray:
@@ -29,6 +31,66 @@ def Floyd(Graph : Union[nx.Graph, nx.DiGraph]) -> np.ndarray:
                 if dist[i][j] > dist[i][k] + dist[k][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
     return dist
+
+def update_distance(shared_dist, n, il, ir, jl, jr, k):
+    if ir <= il or jr <= jl:
+        return
+    
+    # 将共享内存的 dist 重新映射为 NumPy 数组
+    dist = np.frombuffer(shared_dist).reshape((n, n))
+
+    # 更新距离，带有 k 十字写保护
+    for i in range(il, ir):
+        for j in range(jl, jr):
+            dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+    
+
+def ParallelFloyd(Graph: Union[nx.Graph, nx.DiGraph]) -> np.ndarray:
+    """返回最短路矩阵, 使用并行Floyd算法
+
+    Args:
+        Graph (Union[nx.Graph, nx.DiGraph]): networkx.Graph / networkx.DiGraph 表示的图
+
+    Returns:
+        np.ndarray: 最短路矩阵
+    """
+    # 初始化
+    n = len(Graph)
+    
+    # 初始化共享的 dist 数组为一维列表，方便并行进程共享
+    dist = np.array([[float('inf') for i in range(n)] for j in range(n)])
+    for i in range(n):
+        dist[i][i] = 0
+    for edge in Graph.edges():
+        if isinstance(Graph, nx.DiGraph):
+            dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
+        else:
+            dist[edge[0]][edge[1]] = Graph[edge[0]][edge[1]]['weight']
+            dist[edge[1]][edge[0]] = Graph[edge[0]][edge[1]]['weight']
+    
+    # 将 dist 转换为共享内存中的可变列表
+    shared_dist = multiprocessing.Array('d', dist.flatten(), lock=False)
+
+    # 多进程并行执行 Floyd 算法
+    for k in range(n):
+        processes = []
+        tasks = [
+            (shared_dist, n, 0, k, 0, k, k),
+            (shared_dist, n, k+1, n, 0, k, k),
+            (shared_dist, n, 0, k, k+1, n, k),
+            (shared_dist, n, k+1, n, k+1, n, k)
+        ]
+        for task in tasks:
+            p = multiprocessing.Process(target=update_distance, args=task)
+            processes.append(p)
+            p.start()
+        for p in processes:
+            p.join()
+
+
+    # 任务完成后，将共享的 dist 恢复为 NumPy 二维数组
+    return np.array(shared_dist).reshape((n, n))
 
 def FloydGetPath(Graph : Union[nx.Graph, nx.DiGraph], start : int, end : int) -> (list, float):
     """返回最短路列表&路径长度, 使用Floyd算法
@@ -123,20 +185,20 @@ def BellmanFoldSPFA(Graph : nx.Graph, start : int):
     # 初始化
     n = len(Graph)
     dist = np.array([float('inf') for i in range(n)])
+    vis = np.zeros(n, dtype=bool)
+    q = deque()
+
     dist[start] = 0
-    inQueue = [False for i in range(n)]
-    inQueue[start] = True
-    queue = [start]
+    q.append(start)
+    vis[start] = True
+
     # Bellman-Fold算法
-    while len(queue) > 0:
-        u = queue.pop(0)
-        inQueue[u] = False
-        for v in range(n):
+    while len(q) > 0:
+        u = q.popleft()
+        for v in Graph.neighbors(u):
             if dist[u] + Graph[u][v]['weight'] < dist[v]:
                 dist[v] = dist[u] + Graph[u][v]['weight']
-                if not inQueue[v]:
-                    queue.append(v)
-                    inQueue[v] = True
+                q.append(v) 
     return dist
 
 # if __name__ == '__main__':

@@ -4,6 +4,7 @@ import json
 import sys
 import importlib
 import inspect
+import time
 
 import pytest
 import networkx as nx
@@ -22,7 +23,7 @@ class TestClass:
         if test_cases_file is not None:
             self.test_cases = load_graph_list_from_json(test_cases_file)
 
-    def setup_test_algorithm(self, test_algorithm: callable) -> None:
+    def setup_randomtest_algorithm(self, test_algorithm: callable) -> None:
         test_algorithm_signature = inspect.signature(test_algorithm)
         test_algorithm_parameters = test_algorithm_signature.parameters
         if len(test_algorithm_parameters) != 3:
@@ -35,6 +36,18 @@ class TestClass:
                 raise ValueError("test_algorithm parameter type error")
             
         self.random_sp_test_algorithm = test_algorithm
+
+    def setup_fulltest_algorithm(self, test_algorithm: callable) -> None:
+        test_algorithm_signature = inspect.signature(test_algorithm)
+        test_algorithm_parameters = test_algorithm_signature.parameters
+        if len(test_algorithm_parameters) != 1:
+            raise ValueError("test_algorithm should accept 1 parameters")
+        if test_algorithm_signature.return_annotation != np.ndarray:
+            raise ValueError("test_algorithm should return np.ndarray type")
+        if test_algorithm_parameters['graph'].annotation not in [nx.Graph, nx.DiGraph]:
+            raise ValueError("test_algorithm parameter type error")
+        
+        self.full_sp_test_algorithm = test_algorithm
 
     def random_test(self, num: int = 10) -> None:
 
@@ -67,6 +80,26 @@ class TestClass:
             raise ValueError("Not enough test cases")
         index = random.sample(range(len(self.test_cases)), n)
         return [self.test_cases[i]['graph'] for i in index]
+    
+    def full_graph_test(self) -> None:
+        if len(self.test_cases) == 0:
+            raise ValueError("No test cases loaded")
+        if self.full_sp_test_algorithm is None:
+            raise ValueError("No test algorithm loaded")
+        
+        for test_data in self.test_cases:
+            G = test_data['graph']
+            shortest_path_matrix = test_data['shortest_path_matrix']
+            target_path_matrix = self.full_sp_test_algorithm(G)
+            n = len(G.nodes)
+            for i in range(n):
+                for j in range(n):
+                    if np.isinf(shortest_path_matrix[i][j]):
+                        assert np.isinf(target_path_matrix[i][j])
+                    elif np.isnan(shortest_path_matrix[i][j]):
+                        assert np.isnan(target_path_matrix[i][j])
+                    else:
+                        assert target_path_matrix[i][j] == shortest_path_matrix[i][j]
 
         
         

@@ -9,13 +9,14 @@ import threading
 import random
 import re
 
-from flask import Flask, request, render_template_string, send_from_directory
+from flask import Flask, request, render_template_string, send_from_directory, redirect, url_for
 from typing import Union
 from codes.algorithm import FloydGetPath
 
 app = Flask(__name__)
 file_lock = threading.Lock()
 Graph = nx.Graph()
+GraphList = []
 
 # 设置输出目录与检查
 dot_output_directory = 'data/graphs/'  
@@ -34,6 +35,12 @@ html_template = """
 <html>
 <head>
     <title>Graph Viewer</title>
+    <style>
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
     <h1>Graph Viewer</h1>
@@ -41,6 +48,9 @@ html_template = """
         <label for="input">Input:</label>
         <input type="text" id="input" name="input">
         <button type="submit">Submit</button>
+    </form>
+    <form method="post" action="/process_button">
+        <button type="submit">Change Graph</button>
     </form>
     <h2>Output:</h2>
     <p>{{ output }}</p>
@@ -66,6 +76,14 @@ def index():
         else:
             output = "Invalid input format. Please enter two integers separated by a space."
     return render_template_string(html_template, output=output, image_url=image_url)
+
+@app.route('/process_button', methods=['POST'])
+def process_button():
+    global Graph, GraphList
+    # 处理按钮事件的逻辑，例如修改图的某些属性
+    Graph = random.choice(GraphList)
+    renderGraph(Graph)
+    return redirect(url_for('index'))
 
 @app.route('/data/photos/<path:filename>')
 def serve_image(filename):
@@ -120,9 +138,10 @@ def renderGraph(G: Union[nx.Graph, nx.DiGraph], path: list = None):
         dot.render(f'{png_output_directory}{base_file_name}', format='png', view=False)  # 生成 PNG 文件
     os.rename(f'{png_output_directory}{base_file_name}', f'{dot_output_directory}{base_file_name}')  # 移动 dot 文件
 
-def start_http_server(graph):
-    global Graph
-    Graph = graph
+def start_http_server(graphlist):
+    global Graph, GraphList
+    Graph = graphlist[0]
+    GraphList = graphlist
     PORT = 8000
     with file_lock:
         webbrowser.open(f'http://localhost:{PORT}/')

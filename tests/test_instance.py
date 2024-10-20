@@ -6,69 +6,83 @@ import numpy as np
 import tests.test_cases as tc
 import tests.test_model as tm
 
-from codes.algorithm import Floyd, Dijkstra, BellmanFord
-i = 0
-def sampleFloydTestCases(graph: nx.Graph, start: int, end: int) -> float:
-    global i
-    if i < 10:
-        ans_matrix = Floyd(graph)
-        # i += 1
-        return ans_matrix[start][end]
-    else:
-        return np.nan
-    
-def sampleDijkstraTestCases(graph: nx.Graph, start: int, end: int) -> float:
+from codes.algorithm import Floyd, Dijkstra, BellmanFord, BellmanFoldSPFA, ParallelFloyd
+
+def sampleFloydTestCasesPair(graph: nx.Graph, start: int, end: int) -> float:
+    ans_matrix = Floyd(graph)
+    return ans_matrix[start][end]
+
+def sampleParallelFloydTestCasesPair(graph: nx.Graph, start: int, end: int) -> float:
+    ans_matrix = ParallelFloyd(graph)
+    return ans_matrix[start][end]
+
+def sampleDijkstraTestCasesPair(graph: nx.Graph, start: int, end: int) -> float:
     anslist = Dijkstra(graph, start)
     return anslist[end]
 
-def sampleBellmanFordTestCases(graph: nx.Graph, start: int, end: int) -> float:
+def sampleBellmanFordTestCasesPair(graph: nx.Graph, start: int, end: int) -> float:
     anslist = BellmanFord(graph, start)
     return anslist[end]
     
+def sampleBellmanFoldSPFATestCasesPair(graph: nx.Graph, start: int, end: int) -> float:
+    anslist = BellmanFoldSPFA(graph, start)
+    return anslist[end]
 
-def test_Floyd():
-    test_instance = tm.TestClass()
-    test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
-    test_instance.setup_test_algorithm(sampleFloydTestCases)
+def sampleFloydTestCasesGraph(graph: nx.Graph) -> np.ndarray:
+    return Floyd(graph)
 
-    # with pytest.raises(ValueError, match="missing test_algorithm parameter"):
-    #     test_instance.random_test()
+def sampleParallelFloydTestCasesGraph(graph: nx.Graph) -> np.ndarray:
+    return ParallelFloyd(graph)
 
-    # with pytest.raises(ValueError, match="test_algorithm should accept 3 parameters"):
-    #     test_instance.random_test(lambda x: x)
+def sampleDijkstraTestCasesGraph(graph: nx.Graph) -> np.ndarray:
+    n = len(graph)
+    dist = np.full((n, n), np.inf)
+    for i in range(n):
+        dist[i] = Dijkstra(graph, i)
+    return dist
 
-    # with pytest.raises(ValueError, match="test_algorithm should return float type"):
-    #     def wrong_return_type_algorithm(G: nx.Graph, start: int, end: int) -> int:
-    #         return 42
-    #     test_instance.random_test(wrong_return_type_algorithm)
+def sampleBellmanFordTestCasesGraph(graph: nx.Graph) -> np.ndarray:
+    n = len(graph)
+    dist = np.full((n, n), np.inf)
+    for i in range(n):
+        dist[i] = BellmanFord(graph, i)
+    return dist
 
-    test_instance.random_test(10)
+def sampleBellmanFoldSPFATestCasesGraph(graph: nx.Graph) -> np.ndarray:
+    n = len(graph)
+    dist = np.full((n, n), np.inf)
+    for i in range(n):
+        dist[i] = BellmanFoldSPFA(graph, i)
+    return dist
 
 
-def test_Dijkstra():
-    test_instance = tm.TestClass()
-    test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
-    test_instance.setup_test_algorithm(sampleDijkstraTestCases)
-    test_instance.random_test(10)
 
-def test_Flyod_performance(benchmark):
-    # 使用 benchmark 固件来测量 sum 函数的性能
-    test_instance = tm.TestClass()
-    test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
-    test_instance.setup_test_algorithm(sampleFloydTestCases)
-    benchmark(test_instance.random_test, 10)
+# def test_Flyod_performance(benchmark):
+#     # 使用 benchmark 固件来测量 sum 函数的性能
+#     test_instance = tm.TestClass()
+#     test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
+#     test_instance.setup_test_algorithm(sampleFloydTestCases)
+#     benchmark(test_instance.random_test, 10)
 
-def test_Dijsktra_performance(benchmark):
-    test_instance = tm.TestClass()
-    test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
-    test_instance.setup_test_algorithm(sampleDijkstraTestCases)
-    benchmark(test_instance.random_test, 10)
 
-def test_BellmanFord_performance(benchmark):
-    test_instance = tm.TestClass()
-    test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
-    test_instance.setup_test_algorithm(sampleBellmanFordTestCases)
-    benchmark(test_instance.random_test, 10)
+# def test_ParallelFlyod_performance(benchmark):
+#     # 使用 benchmark 固件来测量 sum 函数的性能
+#     test_instance = tm.TestClass()
+#     test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
+#     test_instance.setup_test_algorithm(sampleParallelFloydTestCases)
+#     benchmark(test_instance.random_test, 10)
 
-if __name__ == '__main__':
-    pytest.main(['-s', 'test_instance.py'])
+# def test_Dijsktra_performance(benchmark):
+#     test_instance = tm.TestClass()
+#     test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
+#     test_instance.setup_test_algorithm(sampleDijkstraTestCases)
+#     benchmark(test_instance.random_test, 10)
+
+# def test_BellmanFord_performance(benchmark):
+#     test_instance = tm.TestClass()
+#     test_instance.setup_method(test_cases_file='data/sample_test_cases/class1/large_class1_test_cases1.json')
+#     test_instance.setup_test_algorithm(sampleBellmanFordTestCases)
+#     benchmark(test_instance.random_test, 10)
+
+# if __name__ == '__main__':
+#     pytest.main(['-s', 'test_instance.py'])
